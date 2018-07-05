@@ -6,7 +6,7 @@ import sys
 import csv
 
 
-def simulate_rideshare(num_passengers, num_vehicles, vehicle_speed, x_max, y_max, time_length, time_interval, drop_off_pen, reassign_pen, wait_pen, pass1_pen = 1, pass2_pen = 1, rideshare_flat_penalty = 25, rideshare = True, epsilon = 1):
+def simulate_rideshare(num_passengers, num_vehicles, vehicle_speed, x_max, y_max, time_length, time_interval, drop_off_pen, reassign_pen, wait_pen, pass1_pen = 1, pass2_pen = 1, rideshare_flat_penalty = 25, rideshare = True, zeta = 1):
 	random.seed(12)
 
 	'''
@@ -190,7 +190,7 @@ def simulate_rideshare(num_passengers, num_vehicles, vehicle_speed, x_max, y_max
 					d11[i][j] = point_dist((vehicle.x, vehicle.y), considered_passenger.o) + point_dist(considered_passenger.o, current_passenger.d) - dist_to_d(current_passenger, vehicle)
 					d12[i][j] = point_dist(considered_passenger.o, current_passenger.d) + point_dist(current_passenger.d, considered_passenger.d) - point_dist(considered_passenger.o, considered_passenger.d)
 					d21[i][j] = point_dist((vehicle.x, vehicle.y), considered_passenger.o) + point_dist(considered_passenger.o, considered_passenger.d) + point_dist(considered_passenger.d, current_passenger.d) - dist_to_d(current_passenger, vehicle) + extra[i]				
-					rideshare_pen[i][j] = [psi1 * (d11[i][j] + distance(considered_passenger, vehicle)) + psi2 * d12[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, current_passenger.d) , 0] if psi1 * d11[i][j] + psi2 * d12[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, current_passenger.d) < psi1 * d21[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, considered_passenger.d) else [psi1 * (d21[i][j] + distance(considered_passenger, vehicle)) - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, considered_passenger.d), 1]
+					rideshare_pen[i][j] = [psi1 * (d11[i][j] + distance(considered_passenger, vehicle)) + psi2 * d12[i][j] - zeta * point_dist(considered_passenger.o, current_passenger.d) , 0] if psi1 * d11[i][j] + psi2 * d12[i][j] - zeta * point_dist(considered_passenger.o, current_passenger.d) < psi1 * d21[i][j] - zeta * point_dist(considered_passenger.o, considered_passenger.d) else [psi1 * (d21[i][j] + distance(considered_passenger, vehicle)) - zeta * point_dist(considered_passenger.o, considered_passenger.d), 1]
 				else:
 					d11[i][j] = 0
 					d12[i][j] = 0
@@ -481,7 +481,7 @@ def simulate_rideshare(num_passengers, num_vehicles, vehicle_speed, x_max, y_max
 					d11[i][j] = point_dist((vehicle.x, vehicle.y), considered_passenger.o) + point_dist(considered_passenger.o, current_passenger.d) - dist_to_d(current_passenger, vehicle)
 					d12[i][j] = point_dist(considered_passenger.o, current_passenger.d) + point_dist(current_passenger.d, considered_passenger.d) - point_dist(considered_passenger.o, considered_passenger.d)
 					d21[i][j] = point_dist((vehicle.x, vehicle.y), considered_passenger.o) + point_dist(considered_passenger.o, considered_passenger.d) + point_dist(considered_passenger.d, current_passenger.d) - dist_to_d(current_passenger, vehicle) + extra[i]
-					rideshare_pen[i][j] = [psi1 * (d11[i][j] + distance(considered_passenger, vehicle)) + psi2 * d12[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, current_passenger.d) , 0] if psi1 * d11[i][j] + psi2 * d12[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, current_passenger.d) < psi1 * d21[i][j] - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, considered_passenger.d) else [psi1 * (d21[i][j] + distance(considered_passenger, vehicle)) - (psi1 + psi2)* epsilon * point_dist(considered_passenger.o, considered_passenger.d), 1]
+					rideshare_pen[i][j] = [psi1 * (d11[i][j] + distance(considered_passenger, vehicle)) + psi2 * d12[i][j] - zeta * point_dist(considered_passenger.o, current_passenger.d) , 0] if psi1 * d11[i][j] + psi2 * d12[i][j] - zeta * point_dist(considered_passenger.o, current_passenger.d) < psi1 * d21[i][j] - zeta * point_dist(considered_passenger.o, considered_passenger.d) else [psi1 * (d21[i][j] + distance(considered_passenger, vehicle)) - zeta * point_dist(considered_passenger.o, considered_passenger.d), 1]
 				else:
 					d11[i][j] = 0
 					d12[i][j] = 0
@@ -1305,7 +1305,7 @@ def simulate_rideshare(num_passengers, num_vehicles, vehicle_speed, x_max, y_max
 	#loop
 
 	while t <= T:
-		print('Modeling time = ' + str(t))
+		# print('Modeling time = ' + str(t))
 		# for passenger in R_prime:
 		# 	print('Passenger #' + str(passenger.num) + ' pos: (' + str(passenger.x) + ',' + str(passenger.y) + ')   dest: ', passenger.d, '   dist: ', point_dist((passenger.x, passenger.y), passenger.d), '  appearing ', passenger.appear)
 		# for vehicle in V:
@@ -1409,8 +1409,8 @@ class Passenger:
 		self.vehicle = None #vehicle number that is serving it; not the vehicle object!
 		self.reassigned = 0
 		self.wait = 0
-		self.appear = random.random() * time_horizon 
-		self.appear = 0 #for testing
+		self.appear = random.random() * time_horizon * 0.7
+		# self.appear = 0 #for testing
 		self.picked_up = 0
 		self.extra = 0
 
@@ -1442,7 +1442,7 @@ def point_dist(p1, p2):
 	return math.sqrt(x_d**2 + y_d**2)
 
 #Choose inputs here
-number_of_passengers = 200
+number_of_passengers = 400
 number_of_vehicles = 30
 vehicle_speed = 60. #kmh 55 or 60 default
 x_size = 10. #km
@@ -1456,78 +1456,79 @@ pass1_distance_pen = 1.5
 pass2_distance_pen = 1.1
 rideshare_flat_penalty = 1.8
 rideshare = True 
-epsilon = 0.5
+zeta = 0.5
 
 #simulation is calculated in km and seconds
 vehicle_speed /= 3600. #kms
 run_horizon *= 3600. #s
 
-time, served, empty1, empty2, total, average_waits, waits = simulate_rideshare(number_of_passengers, number_of_vehicles, vehicle_speed, x_size, y_size, run_horizon, update_interval, dropoff_reasssignment_penalty, reassignment_penalty, waiting_penalty, pass1_distance_pen, pass2_distance_pen, rideshare_flat_penalty, rideshare, epsilon)
+# time, served, empty1, empty2, total, average_waits, waits = simulate_rideshare(number_of_passengers, number_of_vehicles, vehicle_speed, x_size, y_size, run_horizon, update_interval, dropoff_reasssignment_penalty, reassignment_penalty, waiting_penalty, pass1_distance_pen, pass2_distance_pen, rideshare_flat_penalty, rideshare, zeta)
 
-passengers_used = []
-vehicles_used = []
-vehicle_speed_used = []
-sim_x_size_used = []
-sim_y_size_used = []
-run_horizon_used = []
-update_interval_used = []
-dropoff_reasssignment_penalty_used = []
-reassignment_penalty_used = []
-waiting_penalty_used = []
-pass1_distance_pen_used = []
-pass2_distance_pen_used = []
-rideshare_flat_penalty_used = []
-rideshare_allowed = []
-epsilons = []
+# passengers_used = []
+# vehicles_used = []
+# vehicle_speed_used = []
+# sim_x_size_used = []
+# sim_y_size_used = []
+# run_horizon_used = []
+# update_interval_used = []
+# dropoff_reasssignment_penalty_used = []
+# reassignment_penalty_used = []
+# waiting_penalty_used = []
+# pass1_distance_pen_used = []
+# pass2_distance_pen_used = []
+# rideshare_flat_penalty_used = []
+# rideshare_allowed = []
+# zetas = []
 
-variables = [passengers_used, vehicles_used, vehicle_speed_used, sim_x_size_used, sim_y_size_used, run_horizon_used, 
-			update_interval_used, dropoff_reasssignment_penalty_used, reassignment_penalty_used, waiting_penalty_used,
-			pass1_distance_pen_used, pass2_distance_pen_used, rideshare_flat_penalty_used, rideshare_allowed, epsilons]
+# variables = [passengers_used, vehicles_used, vehicle_speed_used, sim_x_size_used, sim_y_size_used, run_horizon_used, 
+# 			update_interval_used, dropoff_reasssignment_penalty_used, reassignment_penalty_used, waiting_penalty_used,
+# 			pass1_distance_pen_used, pass2_distance_pen_used, rideshare_flat_penalty_used, rideshare_allowed, zetas]
 
-run_time = []
-num_served = []
-empty_km_1 = []
-empty_km_2 = []
-total_km = []
-averages = []
-wait_times = []
+# run_time = []
+# num_served = []
+# empty_km_1 = []
+# empty_km_2 = []
+# total_km = []
+# averages = []
+# wait_times = []
 
-results = [run_time, num_served, empty_km_1, empty_km_2, total_km, averages, wait_times]
+# results = [run_time, num_served, empty_km_1, empty_km_2, total_km, averages, wait_times]
 
-passengers_used.append(number_of_passengers)
-vehicles_used.append(number_of_vehicles)
-vehicle_speed_used.append(vehicle_speed)
-sim_x_size_used.append(x_size)
-sim_y_size_used.append(y_size)
-run_horizon_used.append(run_horizon)
-update_interval_used.append(update_interval)
-dropoff_reasssignment_penalty_used.append(dropoff_reasssignment_penalty)
-reassignment_penalty_used.append(reassignment_penalty)
-waiting_penalty_used.append(waiting_penalty)
-pass1_distance_pen_used.append(pass1_distance_pen)
-pass2_distance_pen_used.append(pass2_distance_pen)
-rideshare_flat_penalty_used.append(rideshare_flat_penalty)
-rideshare_allowed.append(rideshare)
-epsilons.append(epsilon)
-run_time.append(time)
-num_served.append(served)
-empty_km_1.append(empty1)
-empty_km_2.append(empty2)
-total_km.append(total)
-averages.append(average_waits)
-wait_times.append(waits)
+# passengers_used.append(number_of_passengers)
+# vehicles_used.append(number_of_vehicles)
+# vehicle_speed_used.append(vehicle_speed)
+# sim_x_size_used.append(x_size)
+# sim_y_size_used.append(y_size)
+# run_horizon_used.append(run_horizon)
+# update_interval_used.append(update_interval)
+# dropoff_reasssignment_penalty_used.append(dropoff_reasssignment_penalty)
+# reassignment_penalty_used.append(reassignment_penalty)
+# waiting_penalty_used.append(waiting_penalty)
+# pass1_distance_pen_used.append(pass1_distance_pen)
+# pass2_distance_pen_used.append(pass2_distance_pen)
+# rideshare_flat_penalty_used.append(rideshare_flat_penalty)
+# zetas.append(zeta)
+# rideshare_allowed.append(rideshare)
 
-with open ('csvfile.csv','a') as file:
-	writer = csv.writer(file)
-	temp = ['passengers', 'vehicles', 'vehicle speed', 'x-dim', 'y-dim', 'time horizon', 'update interval', 'immediate pickup penalty', 
-	'reassignment penalty', 'waiting penalty', 'pass1 penalty', 'pass2 penalty', 'rideshare flat penalty', 'rideshares', 'epsilns', 'run time', 
-	'number served', 'empty km 1', 'empty km 2', 'total km', 'average wait', 'wait times']
-	writer.writerow(temp)
+# run_time.append(time)
+# num_served.append(served)
+# empty_km_1.append(empty1)
+# empty_km_2.append(empty2)
+# total_km.append(total)
+# averages.append(average_waits)
+# wait_times.append(waits)
 
-	for i in range(len(variables[0])):
-		res = []
-		for j in range(len(variables)):
-			res.append(str(variables[j][i]))
-		for j in range(len(results)):
-			res.append(str(results[j][i]))
-		writer.writerow(res)
+# with open ('csvfile.csv','a') as file:
+# 	writer = csv.writer(file)
+# 	temp = ['passengers', 'vehicles', 'vehicle speed', 'x-dim', 'y-dim', 'time horizon', 'update interval', 'immediate pickup penalty', 
+# 	'reassignment penalty', 'waiting penalty', 'pass1 penalty', 'pass2 penalty', 'rideshare flat penalty', 'zeta', 'rideshares', 'run time', 
+# 	'number served', 'empty km 1', 'empty km 2', 'total km', 'average wait', 'wait times']
+# 	writer.writerow(temp)
+
+# 	for i in range(len(variables[0])):
+# 		res = []
+# 		for j in range(len(variables)):
+# 			res.append(str(variables[j][i]))
+# 		for j in range(len(results)):
+# 			res.append(str(results[j][i]))
+# 		writer.writerow(res)
