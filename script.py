@@ -35,7 +35,7 @@ passengers = 400
 vehicles = 20
 
 
-with open ('vs.csv','a') as file:
+with open ('vs_small_new.csv','a') as file:
 	writer = csv.writer(file)
 	temp = ['passengers', 'vehicles', 'vehicle speed', 'x-dim', 'y-dim', 'time horizon', 'update interval', 'immediate pickup penalty', 
 	'reassignment penalty', 'waiting penalty', 'pass1 penalty', 'pass2 penalty', 'rideshare flat penalty', 'zeta', 'rideshares', 'run time', 
@@ -55,10 +55,10 @@ while passengers <= 500:
 			dropoff_reasssignment_penalty = 1 #km
 			reassignment_penalty = 1. #km * seconds
 			waiting_penalty = .05 #km/seconds
-			pass1_distance_pen = 2.1
-			pass2_distance_pen = 2
-			rideshare_flat_penalty = 5 #km
-			zeta = 0
+			pass1_distance_pen = 1.5
+			pass2_distance_pen = 1.1
+			rideshare_flat_penalty = 1.8 #km
+			zeta = 1
 			rideshare = True if rideshare_used == 1 else False
 
 			#simulation is calculated in km and seconds
@@ -92,7 +92,7 @@ while passengers <= 500:
 				res.append(average_waits)
 				res.append(waits)
 
-				with open ('vs.csv','a') as file:
+				with open ('vs_small_new.csv','a') as file:
 					writer = csv.writer(file)
 					writer.writerow(res)
 
